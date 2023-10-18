@@ -1,7 +1,8 @@
 # ML_Toolkit
 Machine Learning Toolkit
 
-
+- Ensembling:
+    - https://www.kaggle.com/code/arthurtok/introduction-to-ensembling-stacking-in-python/notebook
 
 - Regression:
     - https://www.kaggle.com/code/juliencs/a-study-on-regression-applied-to-the-ames-dataset/input?select=train.csv
