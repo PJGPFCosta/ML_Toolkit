@@ -167,4 +167,7 @@ class Visualization:
             self=self
 
 
+    def plot_distribution(df,list_of_features=[]):
+        pass
+
 
