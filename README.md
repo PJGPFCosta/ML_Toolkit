@@ -10,3 +10,12 @@ Machine Learning Toolkit
 
 - Trends:
     - (Shopping) - https://www.kaggle.com/code/iamsouravbanerjee/getting-started-with-shopping-trends-beginners
+
+
+- Toolkit:
+    - DataExploration:
+        - most_importante_features_correlation
+        - most_importante_features_treebased
+        - most_important_features
+        - return_categorical_numerical_columns
+    - Transformation:
