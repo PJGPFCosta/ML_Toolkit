@@ -166,8 +166,112 @@ class Visualization:
             """
             self=self
 
+    @staticmethod
+    def plot_correlation(df,target,list_of_features):
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        
+        # Concatenate the target column with the top features
+        selected_columns = [target] + list_of_features
+        selected_df = df[selected_columns]
+        
+        # Calculate the correlation matrix
+        correlation_matrix = selected_df.corr()
+    
+        size=len(selected_columns)
+        
+        # Create a heatmap
+        plt.figure(figsize=(int(size*2), int(size*1.5)))
+        sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+        plt.title('Correlation Heatmap of Top Features')
+        plt.show()
 
-    def plot_distribution(df,list_of_features=[]):
-        pass
+    @staticmethod
+    def plot_relationship_cagorical_target_continuous(df,target,cat_cols):
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        # Create a grid of subplots
+        fig, axes = plt.subplots(nrows=1, ncols=len(cat_cols), figsize=(6*len(cat_cols), 5))
+
+        # Iterate through the categorical columns
+        for i, var in enumerate(cat_cols):
+            data = pd.concat([df[target], df[var]], axis=1)
+            
+            # Create a box plot
+            sns.boxplot(x=var, y=target, data=data, ax=axes[i])
+            #axes[i].set_ylim(0, 800000)  # Set y-axis limits
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Show the plots
+        plt.show()
 
 
+    @staticmethod
+    def plot_relationship_numerical_target_continuous(df,target,num_cols):
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+        # Create a grid of subplots
+        fig, axes = plt.subplots(nrows=1, ncols=len(num_cols), figsize=(6*len(num_cols), 5))
+
+        # Iterate through the categorical columns
+        for i, var in enumerate(num_cols):
+            data = pd.concat([df[target], df[var]], axis=1)
+            
+            # Create a box plot
+            sns.scatterplot(x=var, y=target, data=data, ax=axes[i])
+            #axes[i].set_ylim(0, 800000)  # Set y-axis limits
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Show the plots
+        plt.show()
+
+
+    @staticmethod
+    def plot_relationship_categorical_target_binary(df, target, cat_cols):
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        # Create a grid of subplots
+        fig, axes = plt.subplots(nrows=len(cat_cols), ncols=1, figsize=(8, 6*len(cat_cols)))
+
+        # Iterate through the categorical columns
+        for i, var in enumerate(cat_cols):
+            data = pd.concat([df[target], df[var]], axis=1)
+
+            # Calculate the count of each category for each target class
+            count_data = data.groupby([var, target]).size().reset_index(name='count')
+
+            # Create a grouped bar plot
+            sns.barplot(x=var, y='count', hue=target, data=count_data, ax=axes[i])
+            axes[i].set_title(f'Relationship between {var} and {target}')
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Show the plots
+        plt.show()
+
+    @staticmethod
+    def plot_relationship_numerical_target_binary(df, target, num_cols):
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        # Create a grid of subplots
+        fig, axes = plt.subplots(nrows=1, ncols=len(num_cols), figsize=(6*len(num_cols), 5))
+
+        # Iterate through the numerical columns
+        for i, var in enumerate(num_cols):
+            data = pd.concat([df[target], df[var]], axis=1)
+
+            # Create a box plot or violin plot
+            sns.boxplot(x=target, y=var, data=data, ax=axes[i])
+
+        # Adjust layout
+        plt.tight_layout()
+
+        # Show the plots
+        plt.show()
