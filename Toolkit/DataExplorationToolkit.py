@@ -343,3 +343,148 @@ class Visualization:
 
         # Show the plots
         plt.show()
+
+class Transformations:
+    def __init__(self):
+            """
+            Methods for transforming data to deal with Skewness and Kurtosis
+            """
+            self=self
+
+    @staticmethod
+    def understand_tranformation_lambda(variable_name,transformed_data, lambda_value):
+        
+        import numpy as np
+        print(f"Transformed Data (with lambda={lambda_value}): {transformed_data}")
+
+        if lambda_value<0:
+            lambda_value=int(lambda_value)
+
+        if lambda_value == 0:
+            explanation = f"The '{variable_name}' variable was log-transformed."
+        elif lambda_value == 1:
+            explanation = f"No significant transformation was applied to the '{variable_name}' variable."
+        elif lambda_value > 1:
+            explanation = f"The '{variable_name}' variable was positively transformed with a lambda value of {lambda_value:.2f}."
+        elif 0 < lambda_value < 1:
+            explanation = f"The '{variable_name}' variable was negatively transformed with a lambda value of {lambda_value:.2f}."
+        else:
+            explanation = f"The transformation of the '{variable_name}' variable cannot be easily interpreted."
+
+        print(explanation)
+
+    @staticmethod
+    def transform_skewness(df,var,num=True,flag_prints=False):        
+        """
+        Decide and deal with skewness
+                
+        Positive Skewness:
+        - Log Transformation:
+            - Works well for data with positive skewness.
+            - Reduces the effect of extreme values.
+            - Helps in stabilizing variance.
+        - Square Root Transformation:
+            - Similar to log transformation, it reduces the impact of extreme values.
+            - Useful for right-skewed data.
+
+        Negative Skewness:
+        - Cube Root Transformation:
+            - Works well for data with negative skewness.
+            - It's a milder transformation compared to the square root.
+        - Square Transformation:
+            - Similar to cube root transformation, it can be used to reduce negative skewness.
+
+
+        Kurtosis:
+        Kurtosis measures the tailedness of a probability distribution. It tells you about the shape of the distribution's tails in relation to its peak.
+
+        - Positive Kurtosis (Leptokurtic): The distribution has heavy tails and a high peak. It indicates more outliers than a normal distribution.
+        - Negative Kurtosis (Platykurtic): The distribution has lighter tails and a lower peak. It indicates fewer outliers than a normal distribution.
+
+        Args:
+            df: Input DataFrame.
+            var: Input Targe column.
+            flag_prints: Input boolean to print or not
+
+        Returns:
+            which transformation is best
+        """
+
+        import numpy as np
+        from scipy.stats import boxcox,yeojohnson,ks_2samp
+        
+        # Define a metric based on skewness and kurtosis differences
+        def metric(skew, kurt,flag_prints=False,skew_standart=0.5,kurt_stabdart=3):
+
+            skewnewss=skew_standart-abs(skew)
+            kurtosis=kurt_stabdart-abs(kurt)
+            # Kolmogorov-Smirnov statistic
+            if flag_prints:
+                print("skew: ",skew, " - skewnewss: ",skewnewss)
+                print("kurt: ",kurt, " - kurtosis: ",kurtosis)
+
+            
+            return skewnewss,kurtosis
+
+        # if values are continuous and have 0 as values
+        if num:
+            df[var]=df[var]+0.0001 ## remover 0
+        
+        #original var skewness and kurstosis
+        positive_skewness=df[var].skew()
+
+
+        if positive_skewness>0:
+            # Log Transformation 
+            transformed_data_log = np.log(df[var])
+            log_skew=transformed_data_log.skew()
+            log_kurt=transformed_data_log.kurt()
+            # Sqrt Transformation 
+            transformed_data_sqrt = np.sqrt(df[var])
+            sqrt_skew=transformed_data_sqrt.skew()
+            sqrt_kurt=transformed_data_sqrt.kurt()
+            # Calculate metrics for each transformation
+            if flag_prints:
+                print("log_metric:")
+                log_metric = metric(log_skew, log_kurt,flag_prints)
+                print("log_metric: ",log_metric)
+                print("sqrt_metric:")
+                sqrt_metric = metric(sqrt_skew, sqrt_kurt,flag_prints)
+                print("sqrt_metric: ",sqrt_metric)
+            else:
+                log_metric = metric(log_skew, log_kurt,flag_prints)
+                sqrt_metric = metric(sqrt_skew, sqrt_kurt,flag_prints)
+            # Choose the transformation with the smallest metric
+            best_transformation = min([
+                ('Log', abs(log_metric[0])+abs(log_metric[1]),transformed_data_log,log_skew, log_kurt),
+                ('Sqrt', abs(sqrt_metric[0])+abs(sqrt_metric[1]),transformed_data_sqrt,sqrt_skew, sqrt_kurt)
+            ], key=lambda x: x[1])
+            return best_transformation
+        
+        else:
+            # cube root Transformation 
+            transformed_data_cube_root = np.cbrt(df[var])
+            cube_root_skew=transformed_data_cube_root.skew()
+            cube_root_kurt=transformed_data_cube_root.kurt()
+            # Square Transformation 
+            square_transformed_data = np.square(df[var])
+            square_skew=square_transformed_data.skew()
+            square_kurt=square_transformed_data.kurt()
+            # Calculate metrics for each transformation
+            if flag_prints:
+                print("cube_root_metric:")
+                cube_root_metric = metric(cube_root_skew, cube_root_kurt,flag_prints)
+                print("cube_root_metric: ",cube_root_metric)
+                print("square_metric:")
+                square_metric = metric(square_skew,square_kurt,flag_prints)
+                print("square_metric: ",square_metric)
+            else:
+                cube_root_metric = metric(cube_root_skew, cube_root_kurt,flag_prints)
+                square_metric = metric(square_skew, square_kurt,flag_prints)
+            # Choose the transformation with the smallest metric
+            best_transformation = min([
+                ('Cube_Root', abs(cube_root_metric[0])+abs(cube_root_metric[1]),transformed_data_cube_root,cube_root_skew, cube_root_kurt),
+                ('Square', abs(square_metric[0])+abs(square_metric[1]),square_transformed_data,square_skew, square_kurt)
+            ], key=lambda x: x[1])
+            return best_transformation
+
