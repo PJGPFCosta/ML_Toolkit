@@ -168,6 +168,20 @@ class Visualization:
 
     @staticmethod
     def plot_correlation(df,target,list_of_features):
+
+        """
+        Plots Correlation Matrix all the variables passed with the target.
+        Should Be used with only the most important features.
+
+        Args:
+            df: Input DataFrame.
+            targe: Input Targe column.
+            list_of_features: List of features that want to be ploted agains the target column. 
+
+        Returns:
+            Nothing, it plots
+        """
+
         import matplotlib.pyplot as plt
         import seaborn as sns
         
@@ -188,6 +202,18 @@ class Visualization:
 
     @staticmethod
     def plot_relationship_cagorical_target_continuous(df,target,cat_cols):
+        """
+        Plots BoxPlot all the variables passed with the target type continuous.
+        Should Be used with only the most important features and only categorical features
+
+        Args:
+            df: Input DataFrame.
+            targe: Input Targe column.
+            cat_cols: List of features that want to be ploted agains the target column. 
+
+        Returns:
+            Nothing, it plots
+        """
         import matplotlib.pyplot as plt
         import seaborn as sns
         # Create a grid of subplots
@@ -210,6 +236,20 @@ class Visualization:
 
     @staticmethod
     def plot_relationship_numerical_target_continuous(df,target,num_cols):
+
+        """
+        Plots ScatterPlot all the variables passed with the target type continuous.
+        Should Be used with only the most important features and only continuous features
+
+        Args:
+            df: Input DataFrame.
+            targe: Input Targe column.
+            num_cols: List of features that want to be ploted agains the target column. 
+
+        Returns:
+            Nothing, it plots
+        """
+
         import matplotlib.pyplot as plt
         import seaborn as sns
         # Create a grid of subplots
@@ -232,6 +272,20 @@ class Visualization:
 
     @staticmethod
     def plot_relationship_categorical_target_binary(df, target, cat_cols):
+
+        """
+        Plots Barplot all the variables passed with the target type binary.
+        Should Be used with only the most important features and only categorical features
+
+        Args:
+            df: Input DataFrame.
+            targe: Input Targe column.
+            cat_cols: List of features that want to be ploted agains the target column. 
+
+        Returns:
+            Nothing, it plots
+        """
+
         import matplotlib.pyplot as plt
         import seaborn as sns
 
@@ -257,6 +311,20 @@ class Visualization:
 
     @staticmethod
     def plot_relationship_numerical_target_binary(df, target, num_cols):
+        
+        """
+        Plots BoxPlot all the variables passed with the target type binary.
+        Should Be used with only the most important features and only continuous features
+
+        Args:
+            df: Input DataFrame.
+            targe: Input Targe column.
+            cat_cols: List of features that want to be ploted agains the target column. 
+
+        Returns:
+            Nothing, it plots
+        """
+
         import matplotlib.pyplot as plt
         import seaborn as sns
 
