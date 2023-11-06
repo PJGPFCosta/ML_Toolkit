@@ -432,9 +432,11 @@ class Transformations:
         
         #original var skewness and kurstosis
         positive_skewness=df[var].skew()
-
+        print("Original Skew: ",positive_skewness)
 
         if positive_skewness>0:
+            print("Skewness is to the Left")
+
             # Log Transformation 
             transformed_data_log = np.log(df[var])
             log_skew=transformed_data_log.skew()
@@ -462,6 +464,7 @@ class Transformations:
             return best_transformation
         
         else:
+            print("Skewness is to the Right")
             # cube root Transformation 
             transformed_data_cube_root = np.cbrt(df[var])
             cube_root_skew=transformed_data_cube_root.skew()
@@ -488,3 +491,6 @@ class Transformations:
             ], key=lambda x: x[1])
             return best_transformation
 
+    @staticmethod
+    def transform_kurtosis(df,var,num=True,flag_prints=False): 
+        return df
