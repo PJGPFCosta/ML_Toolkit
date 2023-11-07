@@ -433,6 +433,7 @@ class Transformations:
         #original var skewness and kurstosis
         positive_skewness=df[var].skew()
         print("Original Skew: ",positive_skewness)
+        print("Original Kurtosis: ",df[var].kurt())
 
         if positive_skewness>0:
             print("Skewness is to the Left")
