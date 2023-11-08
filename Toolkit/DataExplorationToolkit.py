@@ -495,3 +495,64 @@ class Transformations:
     @staticmethod
     def transform_kurtosis(df,var,num=True,flag_prints=False): 
         return df
+    
+class DataQuality:
+    def __init__(self):
+            """
+            Methods for data quality assistances.
+            
+            Data quality refers to the degree to which data is accurate, complete, reliable, and relevant for the intended purpose.
+            """
+            self=self
+        
+    @staticmethod
+    def data_profiling(data,num_cols,cat_cols,text_cols):
+        """
+        Data Profiling:
+        - Summary statistics, distributions, and identifying missing or anomalous values.
+
+        Args:
+            data (pd.DataFrame): Input DataFrame for profiling.
+        Returns:
+            profiling_results.keys: keys for searching in the dictionary
+            profiling_results (dict): Dictionary containing profiling results.
+
+        """
+        # Get basic information about the DataFrame
+        num_rows, num_columns = data.shape
+        column_names = data.columns.tolist()
+
+        # Get summary statistics for numeric columns
+        numeric_summary = data[num_cols].describe()
+
+        # Get summary statistics for categorical columns
+        categorical_summary = data[cat_cols].describe(include='object')
+
+        # Get summary statistics for free text columns
+        text_summary = data[text_cols].describe(include='object')
+
+        # Identify unique values and their frequencies for categorical columns
+        unique_values = {}
+        for column in data[cat_cols].select_dtypes(include='object'):
+            unique_values[column] = data[column].value_counts().to_dict()
+
+        # Identify missing values
+        missing_values = data.isnull().sum()
+
+        # Identify data types of columns
+        data_types = data.dtypes
+
+        # Create a dictionary to store profiling results
+        profiling_results = {
+            'num_rows': num_rows,
+            'num_columns': num_columns,
+            'column_names': column_names,
+            'numeric_summary': numeric_summary,
+            'categorical_summary': categorical_summary,
+            'text_summary':text_summary,
+            'unique_values': unique_values,
+            'missing_values': missing_values,
+            'data_types': data_types
+        }
+
+        return profiling_results.keys(),profiling_results
