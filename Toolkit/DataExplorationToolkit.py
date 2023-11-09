@@ -344,6 +344,58 @@ class Visualization:
         # Show the plots
         plt.show()
 
+    @staticmethod
+    def plot_distribution(df, num_cols, cat_cols):
+        """
+        Plots distplot for each column.
+
+        Args:
+            df: Input DataFrame.
+            num_cols: List of numerical features to be plotted.
+            cat_cols: List of categorical features to be plotted.
+
+        Returns:
+            Nothing, it plots.
+        """
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+        # Plot numerical columns
+        if len(num_cols) == 1:
+            sns.distplot(df[num_cols[0]])
+            plt.title(f'Distribution Plot for {num_cols[0]}')
+            plt.show()
+        else:
+            n_cols = len(num_cols)
+            fig, axes = plt.subplots(nrows=1, ncols=n_cols, figsize=(15, 5))
+            fig.tight_layout(pad=3.0)
+
+            for i, col in enumerate(num_cols):
+                sns.distplot(df[col], ax=axes[i])
+                axes[i].set_title(f'Distribution Plot for {col}')
+
+            plt.show()
+
+
+        # Plot categorical columns
+        if len(cat_cols) == 1:
+            sns.countplot(data=df, x=col)
+            plt.title(f'Distribution Plot for {col}')
+            plt.show()
+        else:
+            n_cols = len(cat_cols)
+            fig, axes = plt.subplots(nrows=1, ncols=n_cols, figsize=(15, 5))
+            fig.tight_layout(pad=3.0)
+
+            for i, col in enumerate(cat_cols):
+                sns.countplot(data=df, x=col, ax=axes[i])
+                axes[i].set_title(f'Distribution Plot for {col}')
+
+            plt.show()
+    
+
+
+
 class Transformations:
     def __init__(self):
             """
@@ -495,3 +547,100 @@ class Transformations:
     @staticmethod
     def transform_kurtosis(df,var,num=True,flag_prints=False): 
         return df
+    
+class DataQuality:
+    def __init__(self):
+            """
+            Methods for data quality assistances.
+            
+            Data quality refers to the degree to which data is accurate, complete, reliable, and relevant for the intended purpose.
+            """
+            self=self
+        
+    @staticmethod
+    def data_profiling(data,num_cols,cat_cols,text_cols):
+        """
+        Data Profiling:
+        - Summary statistics, distributions, and identifying missing or anomalous values.
+
+        Args:
+            data (pd.DataFrame): Input DataFrame for profiling.
+        Returns:
+            profiling_results.keys: keys for searching in the dictionary
+            profiling_results (dict): Dictionary containing profiling results.
+
+        """
+        # Get basic information about the DataFrame
+        num_rows, num_columns = data.shape
+        column_names = data.columns.tolist()
+
+        # Get summary statistics for numeric columns
+        numeric_summary = data[num_cols].describe()
+
+        # Get summary statistics for categorical columns
+        categorical_summary = data[cat_cols].describe(include='object')
+
+        # Get summary statistics for free text columns
+        text_summary = data[text_cols].describe(include='object')
+
+        # Identify unique values and their frequencies for categorical columns
+        unique_values = {}
+        for column in data[cat_cols].select_dtypes(include='object'):
+            unique_values[column] = data[column].value_counts().to_dict()
+
+        # Identify missing values
+        missing_values = data.isnull().sum()
+
+        # Identify data types of columns
+        data_types = data.dtypes
+
+        # Create a dictionary to store profiling results
+        profiling_results = {
+            'num_rows': num_rows,
+            'num_columns': num_columns,
+            'column_names': column_names,
+            'numeric_summary': numeric_summary,
+            'categorical_summary': categorical_summary,
+            'text_summary':text_summary,
+            'unique_values': unique_values,
+            'missing_values': missing_values,
+            'data_types': data_types
+        }
+
+        return profiling_results.keys(),profiling_results
+
+
+    
+    @staticmethod
+    def validate_date_range(data,cols, start_date, end_date):
+        """
+        Validate if the dates in datetime columns fall within a specified range.
+
+        Args:
+            data (pd.DataFrame): Input DataFrame.
+            cols(list): List of columns to validate
+            start_date (str): Start date of the acceptable range (format: 'YYYY-MM-DD').
+            end_date (str): End date of the acceptable range (format: 'YYYY-MM-DD').
+
+        Returns:
+            invalid_dates (pd.DataFrame): DataFrame containing rows with invalid dates.
+        """
+        import pandas as pd
+
+        #cast 
+        for col in cols:
+            try:
+                data[col] = pd.to_datetime(data[col])
+            except ValueError as e:
+                print(f"Error: {e} occurred while converting column '{col}' to datetime.")
+                pass  # If casting to datetime fails, it will raise a ValueError
+
+
+        invalid_dates = pd.DataFrame()
+        valid_dates = pd.DataFrame()
+        # Iterate through datetime columns
+        for column in cols:
+            valid_date_range = (pd.to_datetime(start_date), pd.to_datetime(end_date))
+            invalid_dates = pd.concat([invalid_dates, data[(data[column] < valid_date_range[0]) | (data[column] > valid_date_range[1])]])
+            valid_dates=pd.concat([valid_dates, data[(data[column] > valid_date_range[0]) & (data[column] < valid_date_range[1])]])
+        return invalid_dates,valid_dates

@@ -12,7 +12,13 @@ Machine Learning Toolkit
     - (Shopping) - https://www.kaggle.com/code/iamsouravbanerjee/getting-started-with-shopping-trends-beginners
 
 
+
 - Toolkit:
+
+    - Datasets:
+        - https://www.kaggle.com/datasets/ahsen1330/us-police-shootings
+        
+
     - DataExploration:
         - most_importante_features_correlation
         - most_importante_features_treebased
