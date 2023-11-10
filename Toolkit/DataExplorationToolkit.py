@@ -544,9 +544,6 @@ class Transformations:
             ], key=lambda x: x[1])
             return best_transformation
 
-    @staticmethod
-    def transform_kurtosis(df,var,num=True,flag_prints=False): 
-        return df
     
 class DataQuality:
     def __init__(self):
