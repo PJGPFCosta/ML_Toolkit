@@ -393,9 +393,6 @@ class Visualization:
 
             plt.show()
     
-
-
-
 class Transformations:
     def __init__(self):
             """
@@ -544,9 +541,7 @@ class Transformations:
             ], key=lambda x: x[1])
             return best_transformation
 
-    @staticmethod
-    def transform_kurtosis(df,var,num=True,flag_prints=False): 
-        return df
+    
     
 class DataQuality:
     def __init__(self):
@@ -563,7 +558,16 @@ class DataQuality:
         '''
         Calculates the Z-Score for the column values
 
+        Z-score is how many Standart deviations are between the value and the mean
+
         If the values are <-3 or >3 they are considered anomalies.
+
+
+        Args:
+            column_values (pd.Series): Input Column values .
+        Returns:
+            df column with the z_scores 
+           
         '''
         import numpy as np
         median = np.median(column_values)
@@ -592,6 +596,8 @@ class DataQuality:
 
         # Get summary statistics for numeric columns
         numeric_summary = data[num_cols].describe()
+
+        # Get z_scores for the numeric columns
         z_scores = pd.DataFrame()
         for col in num_cols:
             results_z_score=DataQuality.modified_z_score(data[col])
