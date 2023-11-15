@@ -158,6 +158,23 @@ class FeatureSelector:
 
 
         return common_values_list,concatenated_df
+    
+
+class FeatureEngineering:
+
+    def __init__(self):
+        """
+        Methods for Feature Engineering
+        """
+        self=self
+
+    def pca_features():
+        """
+        Methods for Feature Engineering
+        """
+        pca_features=1
+        return pca_features
+
 
 class Visualization:
     def __init__(self):
@@ -540,8 +557,6 @@ class Transformations:
                 ('Square', abs(square_metric[0])+abs(square_metric[1]),square_transformed_data,square_skew, square_kurt)
             ], key=lambda x: x[1])
             return best_transformation
-
-    
     
 class DataQuality:
     def __init__(self):
