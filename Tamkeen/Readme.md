@@ -3,6 +3,12 @@ CheckDuplicates:
 - If needed to run you can ctr+f to search a specific table and only run that block
 
 
+Documents:
+- How to know that this is a document and from where
+- Document Library Base
+
+
+
 Profile Data:
 - Has two initial queries to return the programs and the number of applications each program have.
 

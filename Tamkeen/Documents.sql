@@ -12,6 +12,6 @@ from cte
 
 
 -- Document Library Base
-Select dlb.tmkn_documentlibraryId,dlb.tmkn_name,ib.tmkn_FirstName -- 90624
+Select dlb.tmkn_documentlibraryId,dlb.tmkn_name,ib.tmkn_FirstName -- count -> 90624
 from tmkn_documentlibraryBase dlb
 join tmkn_identityBase ib on ib.tmkn_identityId=dlb.tmkn_Identity
