@@ -10,7 +10,7 @@ Documents:
 
 
 Profile Data:
-- Has two initial queries to return the programs and the number of applications each program have.
+- Has queries to return the programs and the number of applications each program have.
 
 - Returns a High level statistics about the Table and its FK: Column Name, Distinct count, Number of Nulls, total records
     - Update @TableName and @Columns with the the values that you need.

@@ -1,3 +1,8 @@
+-- the ones missing just update the @TableName and change the first id columns to the correct one
+
+
+
+
 -- check duplicates for tmkn_companyBase
 
 DECLARE @TableName NVARCHAR(128) = 'tmkn_companyBase';
@@ -1099,16 +1104,111 @@ exec(@SqlQuerySUM);
 
 
 
+--tws_trainingenrollmentBase
+
+DECLARE @TableName NVARCHAR(128) = 'tws_trainingenrollmentBase';
+DECLARE @ColumnsToExclude NVARCHAR(MAX) = 'tws_trainingenrollmentId,CreatedBy,CreatedOn,CreatedOnBehalfBy,ExchangeRate,Identity_CreatedBy,Identity_CreatedOn,Identity_ModifiedBy,Identity_ModifiedOn,ImportSequenceNumber,ModifiedBy,ModifiedOn,ModifiedOnBehalfBy,OverriddenCreatedOn,OwnerId,OwnerIdType,OwningBusinessUnit,TimeZoneRuleVersionNumber,TransactionCurrencyId,UTCConversionTimeZoneCode,TransactionCurrencyId';
+
+DECLARE @Columns NVARCHAR(MAX);
+DECLARE @ColumnsForDups NVARCHAR(MAX);
+
+-- Generate column list excluding specified columns
+SELECT @Columns = STUFF(
+    (
+        SELECT ',' + QUOTENAME(COLUMN_NAME)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = @TableName AND CHARINDEX(COLUMN_NAME, @ColumnsToExclude) = 0
+        FOR XML PATH(''), TYPE
+    ).value('.', 'NVARCHAR(MAX)'), 1, 1, ''
+);
+
+-- Generate column list for checking duplicates
+SELECT @ColumnsForDups = STUFF(
+    (
+        SELECT ',' + QUOTENAME(COLUMN_NAME)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = @TableName AND CHARINDEX(COLUMN_NAME, @ColumnsToExclude) = 0
+        FOR XML PATH(''), TYPE
+    ).value('.', 'NVARCHAR(MAX)'), 1, 1, ''
+);
+
+-- Execute the dynamic SQL query to get duplicates
+DECLARE @SqlQuery NVARCHAR(MAX) = '
+    SELECT ' + @ColumnsForDups + ',
+           COUNT(*) AS DuplicateCount
+    FROM ' + @TableName + '
+    GROUP BY ' + @ColumnsForDups + '
+    HAVING COUNT(*) > 1';
+	
+
+DECLARE @SqlQuerySUM NVARCHAR(MAX) = '
+    with cte as (
+		SELECT ' + @ColumnsForDups + ',
+			   COUNT(*) AS DuplicateCount
+		FROM ' + @TableName + '
+		GROUP BY ' + @ColumnsForDups + '
+		HAVING COUNT(*) > 1
+	)
+	Select sum(DuplicateCount)as NumDuplicates,count(*) DistinctDuplicates
+	from cte';
+
+
+EXEC(@SqlQuery);
+
+exec(@SqlQuerySUM);
 
 
 
+--tws_wageincrementBase
+
+DECLARE @TableName NVARCHAR(128) = 'tws_wageincrementBase';
+DECLARE @ColumnsToExclude NVARCHAR(MAX) = 'tws_wageincrementId,CreatedBy,CreatedOn,CreatedOnBehalfBy,ExchangeRate,Identity_CreatedBy,Identity_CreatedOn,Identity_ModifiedBy,Identity_ModifiedOn,ImportSequenceNumber,ModifiedBy,ModifiedOn,ModifiedOnBehalfBy,OverriddenCreatedOn,OwnerId,OwnerIdType,OwningBusinessUnit,TimeZoneRuleVersionNumber,TransactionCurrencyId,UTCConversionTimeZoneCode,TransactionCurrencyId';
+
+DECLARE @Columns NVARCHAR(MAX);
+DECLARE @ColumnsForDups NVARCHAR(MAX);
+
+-- Generate column list excluding specified columns
+SELECT @Columns = STUFF(
+    (
+        SELECT ',' + QUOTENAME(COLUMN_NAME)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = @TableName AND CHARINDEX(COLUMN_NAME, @ColumnsToExclude) = 0
+        FOR XML PATH(''), TYPE
+    ).value('.', 'NVARCHAR(MAX)'), 1, 1, ''
+);
+
+-- Generate column list for checking duplicates
+SELECT @ColumnsForDups = STUFF(
+    (
+        SELECT ',' + QUOTENAME(COLUMN_NAME)
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = @TableName AND CHARINDEX(COLUMN_NAME, @ColumnsToExclude) = 0
+        FOR XML PATH(''), TYPE
+    ).value('.', 'NVARCHAR(MAX)'), 1, 1, ''
+);
+
+-- Execute the dynamic SQL query to get duplicates
+DECLARE @SqlQuery NVARCHAR(MAX) = '
+    SELECT ' + @ColumnsForDups + ',
+           COUNT(*) AS DuplicateCount
+    FROM ' + @TableName + '
+    GROUP BY ' + @ColumnsForDups + '
+    HAVING COUNT(*) > 1';
+	
+
+DECLARE @SqlQuerySUM NVARCHAR(MAX) = '
+    with cte as (
+		SELECT ' + @ColumnsForDups + ',
+			   COUNT(*) AS DuplicateCount
+		FROM ' + @TableName + '
+		GROUP BY ' + @ColumnsForDups + '
+		HAVING COUNT(*) > 1
+	)
+	Select sum(DuplicateCount)as NumDuplicates,count(*) DistinctDuplicates
+	from cte';
 
 
+EXEC(@SqlQuery);
 
-
-
-
-
-
-
+exec(@SqlQuerySUM);
 

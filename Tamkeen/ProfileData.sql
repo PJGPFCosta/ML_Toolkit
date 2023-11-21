@@ -8,15 +8,63 @@ from tws_applicationformBase as app
 left join tmkn_pid pid on pid.tmkn_pidId=app.tws_Product
 group by pid.tmkn_ProductName,app.statecode
 
-
-
---List of programs in applicationformbase and it status and its number of applications
+--List of programs in tws_enterpriseapplicationBase and it status and its number of applications
 select pid.tmkn_ProductName as ProgramName,app.statecode, count(distinct app.tws_enterpriseapplicationId) as number_of_app
 from tws_enterpriseapplicationBase as app
 left join tmkn_pid pid on pid.tmkn_pidId=app.tws_Product
 group by pid.tmkn_ProductName,app.statecode
 
+--List of programs in tws_jobapplicationBase and it status and its number of applications
+select pid.tmkn_ProductName as ProgramName,app.statecode, count(distinct app.tws_jobapplicationId) as number_of_app
+from tws_jobapplicationBase as app
+left join tmkn_pid pid on pid.tmkn_pidId=app.tws_Product
+group by pid.tmkn_ProductName,app.statecode
 
+--List of programs in tws_employeeapplicationBase and it status and its number of applications
+select pid.tmkn_ProductName as ProgramName,app.statecode, count(distinct app.tws_employeeapplicationId) as number_of_app
+from tws_employeeapplicationBase as app
+left join tmkn_pid pid on pid.tmkn_pidId=app.tws_Product
+group by pid.tmkn_ProductName,app.statecode
+
+--List of programs in tws_wagesubsidyBase and it status and its number of applications
+select pid.tmkn_ProductName as ProgramName,app.statecode, count(distinct app.tws_wagesubsidyId) as number_of_app
+from tws_wagesubsidyBase as app
+left join tmkn_pid pid on pid.tmkn_pidId=app.tws_Product
+group by pid.tmkn_ProductName,app.statecode
+
+--List of programs in tws_wageincrementBase and it status and its number of applications
+select pid.tmkn_ProductName as ProgramName,app.statecode, count(distinct app.tws_wageincrementId) as number_of_app
+from tws_wageincrementBase as app
+left join tmkn_pid pid on pid.tmkn_pidId=app.tws_Product
+group by pid.tmkn_ProductName,app.statecode
+
+--List of programs in mis_individualapplication and it status and its number of applications
+select pid.tmkn_ProductName as ProgramName,app.statecode, count(distinct app.MIS_individualapplicationId) as number_of_app
+from mis_individualapplication as app
+left join tmkn_pid pid on pid.tmkn_pidId=app.tmkn_pid
+group by pid.tmkn_ProductName,app.statecode
+
+
+-- check the names of the programs
+/*
+select pid.tmkn_ProductName, 
+		count(distinct app.tws_employeeapplicationId),
+		count(distinct app2.tws_trainingenrollmentId),
+		count(distinct app3.tws_wagesubsidyId),
+		count(distinct app4.tws_applicationformId),
+		count(distinct app5.tws_jobapplicationId),
+		count(distinct app6.tws_enterpriseapplicationId),
+		count(distinct app7.tws_wageincrementId)
+from tmkn_pid pid
+left join tws_employeeapplicationBase app on app.tws_Product=pid.tmkn_pidId
+left join tws_trainingenrollmentBase app2 on app2.tws_Product=pid.tmkn_pidId
+left join tws_wagesubsidyBase app3 on app3.tws_Product=pid.tmkn_pidId
+left join tws_applicationformBase app4 on app4.tws_Product=pid.tmkn_pidId
+left join tws_jobapplicationBase app5 on app5.tws_Product=pid.tmkn_pidId
+left join tws_enterpriseapplicationBase app6 on app6.tws_Product=pid.tmkn_pidId
+left join tws_wageincrementBase app7 on app7.tws_Product=pid.tmkn_pidId
+group by pid.tmkn_ProductName
+*/
 
 
 
