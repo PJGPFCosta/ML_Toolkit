@@ -45,6 +45,88 @@ left join tmkn_pid pid on pid.tmkn_pidId=app.tmkn_pid
 group by pid.tmkn_ProductName,app.statecode
 
 
+
+
+
+
+-- Sayed query for Basic Skills Training, Professional Certification Scheme,Individual Development Platform
+
+
+SELECT 
+	ISNULL(PID.tmkn_productname,Prod.MIS_name) AS [Product],
+	SC.Name AS [Status],
+	COUNT(*) AS [Count]
+	FROM Tamkeen_MSCRM.dbo.MIS_individualapplication app
+	INNER JOIN Tamkeen_MSCRM.dbo.MIS_individual ind ON ind.MIS_individualId = app.mis_individualid
+	LEFT JOIN Tamkeen_MSCRM.dbo.mis_certificate cert ON cert.mis_certificateId = app.mis_certificatename
+	LEFT JOIN Tamkeen_MSCRM.dbo.tmkn_pid PID ON PID.tmkn_pidId = app.tmkn_PID
+	LEFT JOIN Tamkeen_MSCRM.dbo.mis_product Prod ON Prod.MIS_productId = app.mis_productid
+	LEFT JOIN dbo.GetOptionSetValuel('MIS_individualapplication','statecode') SC ON SC.ID = app.statecode
+WHERE 
+(
+app.mis_productid IN ('861C188B-A0F5-E111-9F11-02BFAC14025D','8DF92211-A3F5-E111-9F11-02BFAC14025D','2F300C32-426C-EB11-80EB-005056832EEE','47473F35-5ED5-E111-97C4-02BFAC14025D','480B6DCB-A64D-E211-96BC-02BFAC14025D','E1D16878-61D5-E111-97C4-02BFAC14025D','58CE2844-66D5-E111-97C4-02BFAC14025D')
+or app.tmkn_PID IN ('2F300C32-426C-EB11-80EB-005056832EEE','2139B42A-62DA-EC11-B81A-00505683E76F','9B122BE8-1616-ED11-B824-00505683E76F','9AF3F423-C122-ED11-B826-00505683E76F','F4E41D10-97B0-EA11-80DB-005056832EEE','803640A0-2670-EB11-80EC-005056832EEE')
+)
+GROUP BY ISNULL(PID.tmkn_productname,Prod.MIS_name),SC.Name
+
+
+--Basic Skills
+select mis_productidName,statecode,count(mis_productid)
+from MIS_individualapplication
+where mis_productidName like('%Basic%Skills%') 
+group by mis_productidName,statecode
+
+-- Professional Certification Scheme
+select mis_productidName,statecode,count(mis_productid)
+from MIS_individualapplication
+where mis_productidName like('%Professional%Certification%Scheme%') 
+group by mis_productidName,statecode
+
+
+
+
+-- Business Development
+with cte1 as (
+	select PID.tmkn_productname as productName,app.statecode as statecode, count(*) as counts
+	from tws_employeeapplicationBase app
+	join tmkn_pidBase pid on  app.tws_Product=pid.tmkn_pidId
+	where pid.tmkn_pidId IN ('F4E41D10-97B0-EA11-80DB-005056832EEE','803640A0-2670-EB11-80EC-005056832EEE')
+	GROUP BY PID.tmkn_productname,app.statecode
+),
+cte2 as (
+	select PID.tmkn_productname as productName,app.statecode as statecode, count(*) as counts
+	from tws_wagesubsidyBase app
+	join tmkn_pidBase pid on  app.tws_Product=pid.tmkn_pidId
+	where pid.tmkn_pidId IN ('F4E41D10-97B0-EA11-80DB-005056832EEE','803640A0-2670-EB11-80EC-005056832EEE')
+	GROUP BY PID.tmkn_productname,app.statecode
+)
+select *
+from cte1--cte2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -- check the names of the programs
 /*
 select pid.tmkn_ProductName, 
@@ -108,6 +190,8 @@ SET @SqlQuery = LEFT(@SqlQuery, LEN(@SqlQuery) - LEN('UNION ALL'));
 
 -- Execute the dynamic SQL query
 EXEC sp_executesql @SqlQuery;
+
+
 
 
 
