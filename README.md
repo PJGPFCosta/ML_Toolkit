@@ -19,9 +19,7 @@ Machine Learning Toolkit
         - https://www.kaggle.com/datasets/ahsen1330/us-police-shootings
         
 
-    - DataExploration:
-        - most_importante_features_correlation
-        - most_importante_features_treebased
-        - most_important_features
-        - return_categorical_numerical_columns
+    - FeatureExtraction:
+    - Visualization:
     - Transformation:
+    - DataQuality

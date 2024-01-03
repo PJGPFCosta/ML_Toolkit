@@ -158,6 +158,23 @@ class FeatureSelector:
 
 
         return common_values_list,concatenated_df
+    
+
+class FeatureEngineering:
+
+    def __init__(self):
+        """
+        Methods for Feature Engineering
+        """
+        self=self
+
+    def pca_features():
+        """
+        Methods for Feature Engineering
+        """
+        pca_features=1
+        return pca_features
+
 
 class Visualization:
     def __init__(self):
@@ -393,9 +410,6 @@ class Visualization:
 
             plt.show()
     
-
-
-
 class Transformations:
     def __init__(self):
             """
@@ -543,7 +557,6 @@ class Transformations:
                 ('Square', abs(square_metric[0])+abs(square_metric[1]),square_transformed_data,square_skew, square_kurt)
             ], key=lambda x: x[1])
             return best_transformation
-
     
 class DataQuality:
     def __init__(self):
@@ -553,7 +566,32 @@ class DataQuality:
             Data quality refers to the degree to which data is accurate, complete, reliable, and relevant for the intended purpose.
             """
             self=self
-        
+    
+
+    @staticmethod
+    def modified_z_score(column_values):
+        '''
+        Calculates the Z-Score for the column values
+
+        Z-score is how many Standart deviations are between the value and the mean
+
+        If the values are <-3 or >3 they are considered anomalies.
+
+
+        Args:
+            column_values (pd.Series): Input Column values .
+        Returns:
+            df column with the z_scores 
+           
+        '''
+        import numpy as np
+        median = np.median(column_values)
+        mad = np.median(np.abs(column_values - median))
+        modified_z_scores = 0.6745 * (column_values - median) / mad
+        return modified_z_scores
+
+
+
     @staticmethod
     def data_profiling(data,num_cols,cat_cols,text_cols):
         """
@@ -573,6 +611,12 @@ class DataQuality:
 
         # Get summary statistics for numeric columns
         numeric_summary = data[num_cols].describe()
+
+        # Get z_scores for the numeric columns
+        z_scores = pd.DataFrame()
+        for col in num_cols:
+            results_z_score=DataQuality.modified_z_score(data[col])
+            z_scores[col+'_z_scores']=results_z_score
 
         # Get summary statistics for categorical columns
         categorical_summary = data[cat_cols].describe(include='object')
@@ -601,7 +645,8 @@ class DataQuality:
             'text_summary':text_summary,
             'unique_values': unique_values,
             'missing_values': missing_values,
-            'data_types': data_types
+            'data_types': data_types,
+            'z_scores':z_scores
         }
 
         return profiling_results.keys(),profiling_results
