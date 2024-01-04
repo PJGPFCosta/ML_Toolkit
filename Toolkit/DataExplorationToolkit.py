@@ -376,7 +376,8 @@ class Visualization:
         """
         import matplotlib.pyplot as plt
         import seaborn as sns
-
+        # Set a new color palette
+        sns.set_palette("viridis")
         # Plot numerical columns
         if len(num_cols) == 1:
             sns.distplot(df[num_cols[0]])
@@ -384,7 +385,7 @@ class Visualization:
             plt.show()
         else:
             n_cols = len(num_cols)
-            fig, axes = plt.subplots(nrows=1, ncols=n_cols, figsize=(15, 5))
+            fig, axes = plt.subplots(nrows=1, ncols=n_cols, figsize=(5 * n_cols, 5))
             fig.tight_layout(pad=3.0)
 
             for i, col in enumerate(num_cols):
@@ -400,14 +401,17 @@ class Visualization:
             plt.title(f'Distribution Plot for {col}')
             plt.show()
         else:
+            
             n_cols = len(cat_cols)
-            fig, axes = plt.subplots(nrows=1, ncols=n_cols, figsize=(15, 5))
+            fig, axes = plt.subplots(nrows=1, ncols=n_cols, figsize=(5 * n_cols, 5))
             fig.tight_layout(pad=3.0)
 
             for i, col in enumerate(cat_cols):
-                sns.countplot(data=df, x=col, ax=axes[i])
+                unique_values = df[col].nunique()
+                #size_factor = min(max(unique_values / 5, 1), 3)  # Adjust the size factor based on the number of unique values
+                sns.countplot(data=df, x=col, ax=axes[i], palette='viridis')
                 axes[i].set_title(f'Distribution Plot for {col}')
-
+                
             plt.show()
     
 class Transformations:
