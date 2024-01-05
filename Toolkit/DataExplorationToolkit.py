@@ -160,6 +160,62 @@ class FeatureSelector:
         return common_values_list,concatenated_df
     
 
+
+class ModelEvaluation:
+
+    def __init__(self):
+        """
+        Methods for Model Evaluation
+        """
+        self=self
+
+    @staticmethod
+    def evaluate_regression_model(y_test, y_pred, plot_residuals=False):
+        """
+        Evaluate a regression model and return common evaluation metrics.
+
+        Parameters:
+        - y_true: True labels
+        - y_pred: Predicted labels
+        - plot_residuals: Whether to plot residuals (default is False)
+
+        Returns:
+        - metrics_dict: Dictionary containing evaluation metrics
+        """
+        from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+        import matplotlib.pyplot as plt
+
+        metrics_dict = {}
+
+        # Mean Squared Error (MSE)
+        mse = mean_squared_error(y_test, y_pred)
+        metrics_dict['Mean Squared Error'] = mse
+
+        # Mean Absolute Error (MAE)
+        mae = mean_absolute_error(y_test, y_pred)
+        metrics_dict['Mean Absolute Error'] = mae
+
+        # R-squared (R2)
+        r2 = r2_score(y_test, y_pred)
+        metrics_dict['R-squared (R2)'] = r2
+
+        # Plot Residuals
+        if plot_residuals:
+            residuals = y_test - y_pred
+            plt.figure(figsize=(8, 6))
+            plt.scatter(y_pred, residuals, color='blue', alpha=0.6)
+            plt.axhline(y=0, color='red', linestyle='--', linewidth=2)
+            plt.title('Residuals Plot')
+            plt.xlabel('Predicted Values')
+            plt.ylabel('Residuals')
+            plt.show()
+
+        return metrics_dict
+
+
+
+
+
 class FeatureEngineering:
 
     def __init__(self):
