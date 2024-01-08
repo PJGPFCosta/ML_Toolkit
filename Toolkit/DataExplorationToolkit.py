@@ -61,10 +61,22 @@ class FeatureSelector:
 
         df=df.drop(columns=list_to_drop)
         #correlation
-        correlation = df.corr()
-        target_correlation = correlation[target].abs().sort_values(ascending=False)
-        top_features_correlation = target_correlation[1:num_features+1].index.tolist()  # Drop target and get the N variables with higher corr
-        top_features_correlation_values = target_correlation[1:num_features+1].reset_index() # get all values order
+        try:
+            correlation = df.corr()
+        except Exception as correlation_error:
+            print(f"Error in correlation analysis: {correlation_error}")
+            print("Dont forget to label embed the features before trying to extract the most importante features")  # Set correlation to an empty DataFrame or handle it accordingly
+
+        try:
+            if target in correlation.columns:
+                target_correlation = correlation[target].abs().sort_values(ascending=False)
+                top_features_correlation = target_correlation[1:num_features + 1].index.tolist()
+                top_features_correlation_values = target_correlation[1:num_features + 1].reset_index()
+                print(top_features_correlation, top_features_correlation_values)
+            else:
+                print(f"Error: Target column '{target}' not found in correlation analysis.")
+        except Exception as target_correlation_error:
+            print(f"Error in correlation analysis: {target_correlation_error}")
         return top_features_correlation,top_features_correlation_values
 
     @staticmethod
@@ -138,26 +150,38 @@ class FeatureSelector:
             list: List of the most important features and the df of this features with the corresponding importance.
         """
         
-
-        #correlation
-        top_features_correlation,df_features_correlation=FeatureSelector.most_importante_features_correlation(df,target,num_features,list_to_drop)
-        # tree based
-        top_features_treebased,df_features_treebased=FeatureSelector.most_importante_features_treebased(df,target,num_features,list_to_drop)
-
-
-        # Get column names from df1
-        new_column_names = df_features_treebased.columns.tolist()
-
-        # Rename columns of df2
-        df_features_correlation.columns = new_column_names
-
-        concatenated_df = pd.concat([df_features_treebased, df_features_correlation], axis=0)
-        concatenated_df = concatenated_df.drop_duplicates(subset=[concatenated_df.columns[0]])
-
-        common_values_list=concatenated_df.iloc[:, 0].to_list()
+        try:
+            #correlation
+            top_features_correlation,df_features_correlation=FeatureSelector.most_importante_features_correlation(df,target,num_features,list_to_drop)
+        except Exception as correlation_error:
+            print(f"Error in correlation analysis: {correlation_error}")
+            
+            
+        try:
+            # tree based
+            top_features_treebased,df_features_treebased=FeatureSelector.most_importante_features_treebased(df,target,num_features,list_to_drop)
+        except Exception as treebased_error:
+            print(f"Error in TreeBased feature importance analysis: {treebased_error}")
 
 
-        return common_values_list,concatenated_df
+        try:
+            # Get column names from df1
+            new_column_names = df_features_treebased.columns.tolist()
+
+            # Rename columns of df2
+            df_features_correlation.columns = new_column_names
+
+            concatenated_df = pd.concat([df_features_treebased, df_features_correlation], axis=0)
+            concatenated_df = concatenated_df.drop_duplicates(subset=[concatenated_df.columns[0]])
+
+            common_values_list=concatenated_df.iloc[:, 0].to_list()
+
+
+            return common_values_list,concatenated_df
+
+        except Exception as concat_error:
+            print(f"Error in concatenating DataFrames: {concat_error}")
+            return [], pd.DataFrame()
     
 
 
@@ -210,6 +234,58 @@ class ModelEvaluation:
             plt.ylabel('Residuals')
             plt.show()
 
+        return metrics_dict
+    
+    @staticmethod
+    def evaluate_binary_model(y_test, y_pred, plot_confusion_matrix=False):
+        """
+        Evaluate a binary model and return common evaluation metrics.
+
+        Parameters:
+        - y_true: True labels
+        - y_pred: Predicted labels
+        - plot_confusion_matrix: Whether to plot confusion Matrix
+        Returns:
+        - metrics_dict: Dictionary containing evaluation metrics
+        """
+        from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
+
+        metrics_dict = {}
+
+        # F1 Score
+        f1 = f1_score(y_test, y_pred)
+        metrics_dict['F1 Score'] = f1
+        
+        # ROC-AUC
+        roc_auc = roc_auc_score(y_test, y_pred)
+        metrics_dict['ROC-AUC'] = roc_auc
+
+        # Accuracy
+        accuracy = accuracy_score(y_test, y_pred)
+        metrics_dict['Accuracy'] = accuracy
+
+        # Precision
+        precision = precision_score(y_test, y_pred)
+        metrics_dict['Precision'] = precision
+
+        # Recall
+        recall = recall_score(y_test, y_pred)
+        metrics_dict['Recall'] = recall
+
+        
+        # Confusion Matrix
+        if plot_confusion_matrix:
+            cm = confusion_matrix(y_test, y_pred)
+            sns.heatmap(cm, annot=True, fmt='g', cmap='Blues', cbar=False)
+            plt.title('Confusion Matrix')
+            plt.xlabel('Predicted labels')
+            plt.ylabel('True labels')
+            plt.show()
+
+       
         return metrics_dict
 
 
