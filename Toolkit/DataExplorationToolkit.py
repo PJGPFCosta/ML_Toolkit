@@ -18,7 +18,7 @@ class FeatureSelector:
 
 
     @staticmethod
-    def return_categorical_numerical_columns(df,list_to_not_include=[],cat_col_forced=[],max_value_for_categorical=20):
+    def return_columns_by_type(df,list_to_not_include=[],cat_col_forced=[],max_value_for_categorical=20):
 
 
         """
@@ -33,40 +33,49 @@ class FeatureSelector:
             
 
         Returns:
-            list: List of categorical and numerical columns and text_cols. [categorical_cols,numerical_cols,text_cols]
+            list: List of categorical and numerical columns and text_cols. [binary_cols,categorical_cols,numerical_cols,text_cols]
         """
         # Separate categorical and numerical columns
         # Check if the values of the column are "free text" and the number of unique values is bigger than the max for categorical
         text_cols= [col for col in df.columns if df[col].dtype == 'object' and col not in cat_col_forced and df[col].nunique() > max_value_for_categorical and col not in list_to_not_include]
-        numerical_cols= [col for col in df.columns if df[col].dtype in ["int64", "float64"] and col not in cat_col_forced and df[col].nunique() > max_value_for_categorical and col not in list_to_not_include]
-        categorical_cols = [col for col in df.columns if col not in numerical_cols and col not in text_cols and col not in list_to_not_include]
+        binary_cols=[col for col in df.columns if col not in cat_col_forced and df[col].nunique()==2 and col not in list_to_not_include]
+        numerical_cols= [col for col in df.columns if df[col].dtype in ["int64", "float64"] and col not in binary_cols and col not in cat_col_forced and df[col].nunique() > max_value_for_categorical and col not in list_to_not_include]
+        categorical_cols = [col for col in df.columns if col not in numerical_cols and col not in binary_cols and col not in text_cols and col not in list_to_not_include]
 
-        return categorical_cols,numerical_cols,text_cols
+        return binary_cols,categorical_cols,numerical_cols,text_cols
     
     @staticmethod
-    def most_importante_features_correlation(df,target,num_features,list_to_drop):
+    def most_importante_features_correlation(df,target,num_features,list_to_drop, method='pearson'):
         """
         Returns the column names of the N most important variables in a DataFrame.
-        By ensembling the results of correlation analysis and TreeBased feature importance.
+        By ensembling the results of correlation analysis .
 
         Args:
             df: Input DataFrame.
             targe: Input Targe column.
             num_features: Input Number most importante features 
             list_to_drop: List of columns names that are not necessary for ex: Ids,...
+            method: Correlation method ('pearson' or 'spearman'): Person for linear and spearman for non linear
 
         Returns:
             list: List of the most important features and the df of this features with the corresponding importance.
         """
 
+
         df=df.drop(columns=list_to_drop)
-        #correlation
+        # Correlation
         try:
-            correlation = df.corr()
+            if method == 'pearson':
+                correlation = df.corr(method='pearson')
+            elif method == 'spearman':
+                correlation = df.corr(method='spearman')
+            else:
+                raise ValueError("Invalid correlation method. Use 'pearson' or 'spearman'.")
         except Exception as correlation_error:
             print(f"Error in correlation analysis: {correlation_error}")
-            print("Dont forget to label embed the features before trying to extract the most importante features")  # Set correlation to an empty DataFrame or handle it accordingly
-
+            print("Don't forget to label encode the features before trying to extract the most important features.")
+            return [], pd.DataFrame()  # Set correlation to an empty DataFrame
+        
         try:
             if target in correlation.columns:
                 target_correlation = correlation[target].abs().sort_values(ascending=False)
@@ -94,18 +103,30 @@ class FeatureSelector:
         Returns:
             list: List of the most important features and the df of this features with the corresponding importance.
         """
-        categorical_cols,numerical_cols,text_columns=FeatureSelector.return_categorical_numerical_columns(df,[target])
 
-        #drop variavels like Id,... and the text columns like Names, ticket names
-        list_to_drop.extend(text_columns)
-        df=df.drop(columns=list_to_drop)
+        # Check if the categorical features already suffer encoding
+        embeding_cat_flag=False
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                embeding_cat_flag=True
 
-        # Assuming categorical_cols is a list of categorical column names
-        label_encoder = LabelEncoder()
-        df_encoded=df
-        for col in categorical_cols:
-            df_encoded[col] = label_encoder.fit_transform(df_encoded[col])
-       
+
+        if  embeding_cat_flag==True:
+            categorical_cols,numerical_cols,text_columns=FeatureSelector.return_columns_by_type(df,[target])
+            #drop variavels like Id,... and the text columns like Names, ticket names
+            list_to_drop.extend(text_columns)
+            
+            # Assuming categorical_cols is a list of categorical column names
+            label_encoder = LabelEncoder()
+            df_encoded=df
+            for col in categorical_cols:
+                df_encoded[col] = label_encoder.fit_transform(df_encoded[col])
+        else:
+            df_encoded=df
+
+        # drop list that doesnt add anything
+        df_encoded=df_encoded.drop(columns=list_to_drop)
+
         # Fill Nan values
         df_encoded = df_encoded.fillna(df_encoded.median())
 
@@ -131,10 +152,11 @@ class FeatureSelector:
 
         top_feautres_df=feature_importance_df.head(num_features)
 
+        #print("Top Features: ", top_features_treebased)
         return top_features_treebased,top_feautres_df
     
     @staticmethod
-    def most_important_features(df,target,num_features,list_to_drop):
+    def most_important_features(df,target,num_features,list_to_drop,list_to_not_include,cat_col_forced,max_value_for_categorical=20,all_features=False):
         
         """
         Returns the column names of the N most important variables in a DataFrame.
@@ -149,17 +171,88 @@ class FeatureSelector:
         Returns:
             list: List of the most important features and the df of this features with the corresponding importance.
         """
+
+
+
+        from scipy.stats import chi2_contingency, pointbiserialr, f_oneway
+        import numpy as np
+        df_aux = df.copy()
+
+        # Encode features if needed
+        label_encoder = LabelEncoder()
+        binary_cols, cat_cols, num_cols, text_cols = FeatureSelector.return_columns_by_type(df_aux, list_to_not_include, cat_col_forced)
+        if target in binary_cols and  df_aux[target].dtype == 'object':
+            #transform target to value if target
+            df_aux[target] = label_encoder.fit_transform(df_aux[target])
+
+        #print("binary_cols: ",binary_cols)
+        #print("cat_cols: ",cat_cols)
+        #print("num_cols: ",num_cols)
+        #print("text_cols: ",text_cols)
+            
+        # Correlation Analysis
+        # Check if there are categorical features and the type of correlation we want to analyze
+        if len(cat_cols) > 0 and all_features:
+            # For each categorical column, do label encoding
+            for col in cat_cols:
+                df_aux[col] = label_encoder.fit_transform(df_aux[col])
+
+            # Apply ANOVA (Analysis of Variance) for numerical features
+            for col in num_cols:
+                try:
+                    anova_result = f_oneway(*[df_aux[df_aux[col] == value][target] for value in df_aux[col].unique()])
+                    print(f'ANOVA p-value for {col}: {anova_result.pvalue}')
+                    # You can further analyze the results as needed
+                except Exception as anova_error:
+                    print(f"Error in ANOVA for {col}: {anova_error}")
+
+            # Apply Cramér's V for categorical features
+            for col in cat_cols:
+                try:
+                    contingency_table = pd.crosstab(df_aux[col], df_aux[target])
+                    chi2, _, _, _ = chi2_contingency(contingency_table)
+                    n = contingency_table.sum().sum()
+                    cramers_v = np.sqrt(chi2 / (n * (min(contingency_table.shape) - 1)))
+                    print(f'Cramér\'s V for {col}: {cramers_v}')
+                    # You can further analyze the results as needed
+                except Exception as cramers_error:
+                    print(f"Error in Cramér's V for {col}: {cramers_error}")
+
+            # Apply Point-Biserial Correlation (for binary cols)
+            if len(binary_cols)>0:
+                # For each categorical column, do label encoding
+                for col in binary_cols:
+                    if target!=col:
+                        df_aux[col] = label_encoder.fit_transform(df_aux[col])
+                    else:
+                        print(f"Passed target on binary because it was already encoded: {target}")
+                        pass
+                for col in binary_cols:
+                    try:
+                        point_biserial_result = pointbiserialr(df_aux[col], df_aux[target])
+                        print(f'Point-Biserial Correlation for {col}: {point_biserial_result.correlation}, p-value: {point_biserial_result.pvalue}')
+                        # You can further analyze the results as needed
+                    except Exception as point_biserial_error:
+                        print(f"Error in Point-Biserial Correlation for {col}: {point_biserial_error}")
+
+        else:
+            for col in cat_cols:
+                        df_aux[col] = label_encoder.fit_transform(df_aux[col])
+            
+            for col in binary_cols:
+                        df_aux[col] = label_encoder.fit_transform(df_aux[col])
+
         
         try:
             #correlation
-            top_features_correlation,df_features_correlation=FeatureSelector.most_importante_features_correlation(df,target,num_features,list_to_drop)
+            top_features_correlation,df_features_correlation=FeatureSelector.most_importante_features_correlation(df_aux,target,num_features,list_to_drop)
         except Exception as correlation_error:
             print(f"Error in correlation analysis: {correlation_error}")
             
             
         try:
             # tree based
-            top_features_treebased,df_features_treebased=FeatureSelector.most_importante_features_treebased(df,target,num_features,list_to_drop)
+            top_features_treebased,df_features_treebased=FeatureSelector.most_importante_features_treebased(df_aux,target,num_features,list_to_drop)
         except Exception as treebased_error:
             print(f"Error in TreeBased feature importance analysis: {treebased_error}")
 
