@@ -234,7 +234,6 @@ class FeatureSelector:
                         # You can further analyze the results as needed
                     except Exception as point_biserial_error:
                         print(f"Error in Point-Biserial Correlation for {col}: {point_biserial_error}")
-
         else:
             for col in cat_cols:
                         df_aux[col] = label_encoder.fit_transform(df_aux[col])
@@ -301,7 +300,7 @@ class ModelEvaluation:
         """
         from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
         import matplotlib.pyplot as plt
-
+        import numpy as np
         metrics_dict = {}
 
         # Mean Squared Error (MSE)
@@ -315,6 +314,14 @@ class ModelEvaluation:
         # R-squared (R2)
         r2 = r2_score(y_test, y_pred)
         metrics_dict['R-squared (R2)'] = r2
+
+        # Mean Percentage Error (MPE)
+        errors = (y_test - y_pred) / y_test
+        percentage_errors = np.abs(errors) * 100
+        mpe = np.mean(percentage_errors)
+        metrics_dict['Mean Percentage Error (MPE)'] = mpe
+
+
 
         # Plot Residuals
         if plot_residuals:
