@@ -388,8 +388,27 @@ class ModelEvaluation:
        
         return metrics_dict
 
+    @staticmethod
+    def evaluate_data_drift(original_dataset, new_dataset, threshold=0.05):
+        """
+        Evaluate a binary model and return common evaluation metrics.
 
+        Parameters:
+        - original_dataset: original dataset
+        - new_dataset: new dataset to check
+        - threshold: threshold to consider data drift
+        Returns:
+        - tuple: as_data_drift - true or false
+                 statistic - the larger the more dissimilar the two distributions are
+                 p_value - Null hypotesis is confirmed if below the threshold, else it is rejected and we can assume that the distribution is different
+        """
+        from scipy.stats import ks_2samp
 
+        statistic, p_value = ks_2samp(original_dataset, new_dataset)
+
+        as_data_drift=p_value < threshold # True or false
+
+        return as_data_drift,statistic,p_value
 
 
 class FeatureEngineering:
